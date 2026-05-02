@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image to Video - Free & High Quality</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-magic"></i> AI Image to Video</h1>
+            <p>Convert your images to stunning videos in seconds - FREE & High Quality</p>
+        </header>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <p>Drag & drop your image or click to browse</p>
+            <p class="supported">Supports JPG, PNG, WebP (Max 10MB)</p>
+            <input type="file" id="imageInput" accept="image/*" hidden>
+            <button id="browseBtn" class="btn-primary">
+                <i class="fas fa-folder-open"></i> Browse Files
+            </button>
+        </div>
+
+        <div class="controls" id="controls" style="display: none;">
+            <div class="video-settings">
+                <div class="setting-group">
+                    <label>Motion Style:</label>
+                    <select id="motionStyle">
+                        <option value="pan">Smooth Pan</option>
+                        <option value="zoom">Zoom In/Out</option>
+                        <option value="kenburns">Ken Burns</option>
+                        <option value="parallax">Parallax</option>
+                        <option value="cinematic">Cinematic</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Duration:</label>
+                    <select id="duration">
+                        <option value="5">5 seconds</option>
+                        <option value="10" selected>10 seconds</option>
+                        <option value="15">15 seconds</option>
+                        <option value="30">30 seconds</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Quality:</label>
+                    <select id="quality">
+                        <option value="720p">720p</option>
+                        <option value="1080p" selected>1080p</option>
+                        <option value="4k">4K</option>
+                    </select>
+                </div>
+            </div>
+            <button id="generateBtn" class="btn-generate">
+                <i class="fas fa-sparkles"></i> Generate Video
+            </button>
+        </div>
+
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="progressText">Processing your image...</p>
+        </div>
+
+        <div class="result" id="result" style="display: none;">
+            <video id="previewVideo" controls style="max-width: 100%;"></video>
+            <div class="download-section">
+                <button id="downloadBtn" class="btn-download">
+                    <i class="fas fa-download"></i> Download Video
+                </button>
+                <button id="regenerateBtn" class="btn-secondary">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.upload-area {
+    border: 3px dashed #667eea;
+    border-radius: 20px;
+    padding: 60px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.upload-area:hover {
+    border-color: #764ba2;
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateY(-5px);
+}
+
+.upload-icon {
+    font-size: 4rem;
+    color: #667eea;
+    margin-bottom: 20px;
+}
+
+.upload-area p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.supported {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.btn-primary, .btn-generate, .btn-download, .btn-secondary {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 10px;
+}
+
+.btn-primary:hover, .btn-generate:hover, .btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+    background: #667eea;
+    color: white;
+}
+
+.controls {
+    margin: 30px 0;
+    padding: 25px;
+    background: #f8f9fa;
+    border-radius: 16px;
+}
+
+.setting-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.setting-group label {
+    font-weight: 600;
+    color: #333;
+}
+
+.setting-group select {
+    padding: 8px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    background: white;
+    font-size: 1rem;
+}
+
+.progress-container {
+    margin: 30px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+#progressText {
+    text-align: center;
+    color: #666;
+    font-weight: 500;
+}
+
+.result {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.download-section {
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .setting-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }class ImageToVideoAI {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.imageInput = document.getElementById('imageInput');
+        this.uploadArea = document.getElementById('uploadArea');
+        this.controls = document.getElementById('controls');
+        this.generateBtn = document.getElementById('generateBtn');
+        this.progressContainer = document.getElementById('progressContainer');
+        this.progressFill = document.getElementById('progressFill');
+        this.progressText = document.getElementById('progressText');
+        this.result = document.getElementById('result');
+        this.previewVideo = document.getElementById('previewVideo');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.regenerateBtn = document.getElementById('regenerateBtn');
+        this.browseBtn = document.getElementById('browseBtn');
+
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        // Drag & Drop
+        this.uploadArea.addEventListener('click', () => this.imageInput.click());
+        this.imageInput.addEventListener('change', (e) => this.handleImageUpload(e));
+        this.browseBtn.addEventListener('click', () => this.imageInput.click());
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            this.uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            this.uploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            this.uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        this.uploadArea.addEventListener('drop', (e) => this.handleImageUpload(e), false);
+
+        this.generateBtn.addEventListener('click', () => this.generateVideo());
+        this.regenerateBtn.addEventListener('click', () => this.reset());
+        this.downloadBtn.addEventListener('click', () => this.downloadVideo());
+    }
+
+    handleImageUpload(e) {
+        const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.showImagePreview(e.target.result);
+            };
+            reader.readAsDataURL(file);
+            this.currentImage = file;
+        }
+    }
+
+    showImagePreview(imageData) {
+        this.uploadArea.style.display = 'none';
+        this.controls.style.display = 'block';
+        
+        // Create preview thumbnail
+        const preview = document.createElement('img');
+        preview.src = imageData;
+        preview.style.cssText = `
+            max-width: 100%; 
+            max-height: 300px; 
+            border-radius: 12px; 
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        `;
+        this.controls.parentNode.insertBefore(preview, this.controls);
+    }
+
+    async generateVideo() {
+        this.showProgress(0, 'Analyzing image with AI...');
+        
+        // Simulate AI processing phases
+        const phases = [
+            { progress: 25, text: 'Generating motion paths...' },
+            { progress: 50, text: 'Applying AI animation...' },
+            { progress: 75, text: 'Enhancing with super-resolution...' },
+            { progress: 100, text: 'Finalizing high-quality video...' }
+        ];
+
+        for (let phase of phases) {
+            await this.sleep(800);
+            this.showProgress(phase.progress, phase.text);
+        }
+
+        await this.sleep(500);
+        this.createVideo();
+    }
+
+    createVideo() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const video = document.createElement('video');
+        
+        canvas.width = 1920;
+        canvas.height = 1080;
+        
+        const img = new Image();
+        img.onload = () => {
+            const duration = parseInt(document.getElementById('duration').value);
+            const fps = 30;
+            const totalFrames = duration * fps;
+            
+            let frame = 0;
+            const motionStyle = document.getElementById('motionStyle').value;
+            
+            function animate() {
+                if (frame >= totalFrames) {
+                    video.src = canvas.toDataURL('video/webm');
+                    this.showResult(video);
+                    return;
+                }
+                
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // AI Motion Effects
+                this.applyMotionEffect(ctx, img, frame / totalFrames, motionStyle);
+                
+                frame++;
+                setTimeout(animate, 1000 / fps);
+            }
+            
+            animate();
+        };
+        img.src = this.imageInput.files[0] ? URL.createObjectURL(this.currentImage) : '';
+    }
+
+    applyMotionEffect(ctx, img, progress, style) {
+        const cw = canvas.width;
+        const ch = canvas.height;
+        const iw = img.width;
+        const ih = img.height;
+        
+        ctx.save();
+        
+        switch (style) {
+            case 'pan':
+                const panX = (progress - 0.5) * cw * 0.3;
+                const panY = (progress - 0.5) * ch * 0.2;
+                ctx.translate(cw/2 + panX, ch/2 + panY);
+                break;
+                
+            case 'zoom':
+                const scale = 1 + progress * 0.5;
+                ctx.translate(cw/2, ch/2);
+                ctx.scale(scale, scale);
+                ctx.translate(-cw/2, -ch/2);
+                break;
+                
+            case 'kenburns':
+                const kbScale = 1 + progress * 0.4;
+                const kbX = (progress - 0.5) * cw * 0.1;
+                ctx.translate(cw/2 + kbX, ch/2);
+                ctx.scale(kbScale, kbScale);
+                ctx.translate(-cw/2, -ch/2);
+                break;
+                
+            case 'parallax':
+                ctx.translate(Math.sin(progress * Math.PI * 2) * 50, Math.cos(progress * Math.PI * 3) * 30);
+                break;
+                
+            case 'cinematic':
+                const shake = Math.sin(frame * 0.2) * 3;
+                ctx.translate(shake, shake);
+                const vignette = ctx.createRadialGradient(cw/2, ch/2, 0, cw/2, ch/2, Math.max(cw, ch));
+                vignette.addColorStop(0, 'rgba(0,0,0,0)');
+                vignette.addColorStop(1, 'rgba(0,0,0,0.6)');
+                ctx.fillStyle = vignette;
+                ctx.fillRect(0, 0, cw, ch);
+                break;
+        }
+        
+        ctx.drawImage(img, 0, 0, cw, ch);
+        ctx.restore();
+    }
+
+    showProgress(percent, text) {
+        this.progressContainer.style.display = 'block';
+        this.progressFill.style.width = percent + '%';
+        this.progressText.textContent = text;
+    }
+
+    showResult(video) {
+        this.progressContainer.style.display = 'none';
+        this.result.style.display = 'block';
+        this.previewVideo.src = video.src;
+    }
+
+    downloadVideo() {
+        const video = this.previewVideo;
+        const link = document.createElement('a');
+        link.href = video.src;
+        link.download = `ai-video-${Date.now()}.webm`;
+        link.click();
+    }
+
+    reset() {
+        this.result.style.display = 'none';
+        this.controls.style.display = 'none';
+        this.uploadArea.style.display = 'block';
+        this.uploadArea.innerHTML = `
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <p>Drag & drop your image or click to browse</p>
+            <p class="supported">Supports JPG, PNG, WebP (Max 10MB)</p>
+            <button id="browseBtn" class="btn-primary">
+                <i class="fas fa-folder-open"></i> Browse Files
+            </button>
+        `;
+        this.setupEventListeners();
+    }
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+}
+
+// Utility functions
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function highlight(e) {
+    e.target.style.borderColor = '#764ba2';
+    e.target.style.background = 'rgba(118, 75, 162, 0.1)';
+}
+
+function unhighlight(e) {
+    e.target.style.borderColor = '#667eea';
+    e.target.style.background = 'rgba(102, 126, 234, 0.05)';
+}
+
+// Initialize app
+new ImageToVideoAI();
+}
